@@ -7,10 +7,23 @@ session_start();
 // Include the database connection from the app/config directory
 require_once '../app/config/databaseconnection.php'; 
 
+// Handle Logout
+if (isset($_GET['action']) && $_GET['action'] === 'logout') {
+    $_SESSION = [];
+    session_destroy();
+    header("Location: login.php");
+    exit;
+}
+
 $message = '';
 $messageType = '';
 
 // used username for full name in database
+
+// Determine which form to show on reload:
+// keep the register form open on a registration error so the user doesn't lose their place,
+// otherwise default to the login form (including right after a successful registration).
+$showRegisterForm = false;
 
 // Handle Form Submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -27,22 +40,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($role === 'admin') {
             $message = "Error: Admin credentials cannot be created here.";
             $messageType = "error";
+            $showRegisterForm = true;
         } else {
             // Hash the password for security
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-            
             try {
-                // Prepared statement to prevent SQL Injection
+                $pdo->beginTransaction();
+
+                // Insert into the user table
                 $stmt = $pdo->prepare("INSERT INTO user (username, full_name, email, password_hash, role) VALUES (?, ?, ?, ?, ?)");
-                if ($stmt->execute([$username, $username, $email, $hashedPassword, $role])) {
-                    $message = "ID created successfully! You can now log in.";
-                    $messageType = "success";
+                $stmt->execute([$username, $username, $email, $hashedPassword, $role]);
+                $newUserId = $pdo->lastInsertId();
+
+                // Insert into the matching role-specific table
+                if ($role === 'doctor') {
+                    $stmt2 = $pdo->prepare("INSERT INTO doctor (user_id) VALUES (?)");
+                    $stmt2->execute([$newUserId]);
+                } elseif ($role === 'patient') {
+                    $stmt2 = $pdo->prepare("INSERT INTO patient (user_id) VALUES (?)");
+                    $stmt2->execute([$newUserId]);
                 }
+
+                $pdo->commit();
+                $message = "ID created successfully! You can now log in.";
+                $messageType = "success";
             } catch (PDOException $e) {
-                // Handle duplicate email or other DB errors
+                // Roll back both inserts if either one failed
+                $pdo->rollBack();
                 $message = "Registration failed. Email might already exist.";
                 $messageType = "error";
+                $showRegisterForm = true;
             }
         }
     }
@@ -181,7 +209,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php endif; ?>
 
     <!-- LOGIN FORM -->
-    <div id="login-section">
+    <div id="login-section" class="<?= $showRegisterForm ? 'hidden' : '' ?>">
         <h2>Login</h2>
         <form method="POST" action="login.php">
             <input type="hidden" name="action" value="login">
@@ -204,7 +232,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <!-- REGISTER FORM -->
-    <div id="register-section" class="hidden">
+    <div id="register-section" class="<?= $showRegisterForm ? '' : 'hidden' ?>">
         <h2>Create ID</h2>
         <form method="POST" action="login.php">
             <input type="hidden" name="action" value="register">

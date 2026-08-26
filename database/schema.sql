@@ -127,10 +127,10 @@ INSERT INTO `consultation` (`consultation_id`, `admission_id`, `doctor_id`, `con
 CREATE TABLE `doctor` (
   `doctor_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
-  `specialization_id` int(11) NOT NULL,
+  `specialization_id` int(11) DEFAULT NULL,
   `designation` varchar(60) DEFAULT NULL,
   `phone` varchar(20) DEFAULT NULL,
-  `status` enum('Active','Inactive') NOT NULL DEFAULT 'Active'
+  `status` enum('Active','Inactive') DEFAULT 'Active'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -180,7 +180,7 @@ INSERT INTO `medicine` (`medicine_id`, `name`, `form`, `strength`) VALUES
 CREATE TABLE `patient` (
   `patient_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
-  `gender` enum('Male','Female','Other') NOT NULL,
+  `gender` enum('Male','Female','Other') DEFAULT NULL,
   `date_of_birth` date DEFAULT NULL,
   `blood_group` varchar(5) DEFAULT NULL,
   `address` varchar(255) DEFAULT NULL,
