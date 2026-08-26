@@ -11,37 +11,42 @@
 ## Codebase Structure
 
 ```
-hospital-management/
-│
-├── public/
-│   ├── login.php
-│   ├── admin/
-│   ├── doctor/
-│   ├── patient/
-│   ├── api/
-│   └── assets/
-│
+Hospitalmanagementsys_test/
 ├── app/
 │   ├── config/
-│   │   └── database.php
-│   │
-│   ├── functions/
-│   │   ├── auth.php
-│   │   ├── patients.php
-│   │   ├── doctors.php
-│   │   ├── appointments.php
-│   │   └── medical_records.php
-│   │
-│   ├── middleware/
-│       ├── auth.php
-│       └── role.php
+│   │   └── databaseconnection.php
+│   └── functions/
 │
 ├── database/
+│   ├── misc.md
 │   ├── schema.sql
 │   └── seed.sql
 │
-└── README.md
+├── public/
+│   ├── admin/
+│   │   └── dashboard.php
+│   │
+│   ├── api/
+│   │
+│   ├── asset/
+│   │
+│   ├── doctor/
+│   │
+│   ├── patient/
+│   │   ├── admission.php
+│   │   ├── consultation.php
+│   │   ├── dashboard.php
+│   │   ├── edit.php
+│   │   └── profile.php
+│   │
+│   ├── index.php
+│   └── login.php
+│
+├── .gitignore
+└── Readme.md
+
 ```
+
 
 ## Login execution flow
 

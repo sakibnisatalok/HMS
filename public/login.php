@@ -10,13 +10,15 @@ require_once '../app/config/databaseconnection.php';
 $message = '';
 $messageType = '';
 
+// used username for full name in database
+
 // Handle Form Submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
     // 1. REGISTRATION LOGIC
     if ($action === 'register') {
-        $name = trim($_POST['name']);
+        $username = trim($_POST['username']);
         $email = trim($_POST['email']);
         $password = $_POST['password'];
         $role = $_POST['role'];
@@ -32,8 +34,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             try {
                 // Prepared statement to prevent SQL Injection
-                $stmt = $pdo->prepare("INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)");
-                if ($stmt->execute([$name, $email, $hashedPassword, $role])) {
+                $stmt = $pdo->prepare("INSERT INTO user (username, full_name, email, password_hash, role) VALUES (?, ?, ?, ?, ?)");
+                if ($stmt->execute([$username, $username, $email, $hashedPassword, $role])) {
                     $message = "ID created successfully! You can now log in.";
                     $messageType = "success";
                 }
@@ -53,16 +55,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         try {
             // Fetch the user from the database
-            $stmt = $pdo->prepare("SELECT id, name, password, role FROM users WHERE email = ?");
+            $stmt = $pdo->prepare("SELECT user_id, full_name, password_hash, role FROM user WHERE email = ?");
             $stmt->execute([$email]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
             // Verify the password matches the hashed password in the DB
-            if ($user && password_verify($password, $user['password'])) {
+            if ($user && password_verify($password, $user['password_hash'])) {
                 // Set Session Variables
-                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['user_id'] = $user['user_id'];
                 $_SESSION['role'] = $user['role'];
-                $_SESSION['name'] = $user['name'];
+                $_SESSION['name'] = $user['full_name'];
 
                 // Redirect based on role to their respective folders
                 if ($user['role'] === 'admin') {
@@ -94,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hospital Management System - Login</title>
     <style>
-        /* Basic CSS styling */
+        
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f7f6;
@@ -208,8 +210,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input type="hidden" name="action" value="register">
             
             <div class="form-group">
-                <label>Full Name</label>
-                <input type="text" name="name" required>
+                <label>Username</label>
+                <input type="text" name="username" required>
             </div>
             
             <div class="form-group">

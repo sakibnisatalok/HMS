@@ -3,7 +3,7 @@
 
 
 $host = '127.0.0.1'; //   'localhost' is also fine, but 127.0.0.1 prevents socket issues
-$dbname = 'hms_opd'; // Replace with the actual name of your imported database
+$dbname = 'hms_opd_new'; // Replace with the actual name of your imported database
 $username = 'root'; //   Default MySQL username for local environments
 $password = ''; //   Default MySQL password is usually empty
 $charset = 'utf8mb4';
