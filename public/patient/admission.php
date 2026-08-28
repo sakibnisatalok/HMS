@@ -4,47 +4,97 @@ require_once '../../app/config/databaseconnection.php';
 
 /** @var \PDO $pdo */
 
-// Fetch admission records matching patient schema[cite: 2]
-$stmt = $pdo->prepare("
-    SELECT a.*, u.full_name AS doctor_name 
-    FROM admission a
-    JOIN patient p ON a.patient_id = p.patient_id
-    JOIN doctor d ON a.doctor_id = d.doctor_id
-    JOIN user u ON d.user_id = u.user_id
-    WHERE p.user_id = ?
-    ORDER BY a.admission_date DESC
-");
-$stmt->execute([$_SESSION['user_id']]);
-$admissions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// 1. Access Control Guard
+if (!isset($_SESSION['user_id']) || strtolower($_SESSION['role']) !== 'patient') {
+    http_response_code(403);
+    echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+    exit;
+}
+
+// 2. POST handler
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    header('Content-Type: application/json');
+
+    // Retrieve patient_id matching session user_id
+    $stmt = $pdo->prepare("SELECT patient_id FROM patient WHERE user_id = ?");
+    $stmt->execute([$_SESSION['user_id']]);
+    $patient = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$patient) {
+        echo json_encode(['success' => false, 'message' => 'Patient profile not found.']);
+        exit;
+    }
+    $patientId = $patient['patient_id'];
+
+    // Inputs
+    $doctorId = filter_input(INPUT_POST, 'doctor_id', FILTER_VALIDATE_INT);
+    $admissionDate = trim($_POST['admission_date'] ?? '');
+    $admissionType = trim($_POST['admission_type'] ?? '');
+    $problem = trim($_POST['problem'] ?? '');
+
+    // Validation
+    if ($doctorId === false || $doctorId === null) {
+        echo json_encode(['success' => false, 'message' => 'Please provide a valid Doctor ID.']);
+        exit;
+    }
+
+    // Verify doctor exists and is active
+    $stmt = $pdo->prepare("SELECT doctor_id FROM doctor WHERE doctor_id = ? AND status = 'Active'");
+    $stmt->execute([$doctorId]);
+    if (!$stmt->fetch()) {
+        echo json_encode(['success' => false, 'message' => 'Selected doctor does not exist or is inactive.']);
+        exit;
+    }
+
+    if (empty($admissionDate)) {
+        echo json_encode(['success' => false, 'message' => 'Please select a consultation/admission date.']);
+        exit;
+    }
+
+    if (!in_array($admissionType, ['Admit', 'Planned'])) {
+        echo json_encode(['success' => false, 'message' => 'Please select a valid admission type.']);
+        exit;
+    }
+
+    // Status mapping: Planned -> Consult, Admit -> Admitted
+    $status = ($admissionType === 'Planned') ? 'Consult' : 'Admitted';
+    $problemValue = ($problem === '') ? null : $problem;
+
+    try {
+        $stmt = $pdo->prepare("
+            INSERT INTO admission (patient_id, doctor_id, admission_date, admission_type, problem, status)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ");
+        $stmt->execute([$patientId, $doctorId, $admissionDate, $admissionType, $problemValue, $status]);
+        echo json_encode(['success' => true, 'message' => 'Admission request submitted successfully!']);
+    } catch (PDOException $e) {
+        echo json_encode(['success' => false, 'message' => 'Failed to save admission request: ' . $e->getMessage()]);
+    }
+    exit;
+}
 ?>
 
-<h2>Admission History</h2>
+<h2>Request Admission</h2>
 <hr style="margin: 15px 0;">
-<table border="1" cellpadding="10" cellspacing="0" style="width: 100%; border-collapse: collapse; text-align: left;">
-    <thead>
-        <tr style="background-color: #f3f4f6;">
-            <th>Admission Date</th>
-            <th>Type</th>
-            <th>Doctor</th>
-            <th>Provisional Diagnosis</th>
-            <th>Status</th>
-            <th>Discharge Date</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php if (empty($admissions)): ?>
-            <tr><td colspan="6" style="text-align:center;">No admission records found.</td></tr>
-        <?php else: ?>
-            <?php foreach ($admissions as $row): ?>
-                <tr>
-                    <td><?= htmlspecialchars($row['admission_date']) ?></td>
-                    <td><?= htmlspecialchars($row['admission_type']) ?></td>
-                    <td><?= htmlspecialchars($row['doctor_name']) ?></td>
-                    <td><?= htmlspecialchars($row['provisional_diagnosis']) ?></td>
-                    <td><b><?= htmlspecialchars($row['status']) ?></b></td>
-                    <td><?= htmlspecialchars($row['discharge_date'] ?? 'N/A') ?></td>
-                </tr>
-            <?php endforeach; ?>
-        <?php endif; ?>
-    </tbody>
-</table>
+<div id="admission-message"></div>
+<form id="admission-form" style="max-width: 400px; display: flex; flex-direction: column; gap: 15px;">
+    <div>
+        <label style="display:block; margin-bottom:5px;">Doctor ID</label>
+        <input type="number" name="doctor_id" required style="width: 100%; padding: 8px;" placeholder="Enter Doctor ID">
+    </div>
+    <div>
+        <label style="display:block; margin-bottom:5px;">Consultation Date</label>
+        <input type="datetime-local" name="admission_date" required style="width: 100%; padding: 8px;">
+    </div>
+    <div>
+        <label style="display:block; margin-bottom:5px;">Admission Type</label>
+        <select name="admission_type" required style="width: 100%; padding: 8px;">
+            <option value="Planned">Planned</option>
+            <option value="Admit">Admit</option>
+        </select>
+    </div>
+    <div>
+        <label style="display:block; margin-bottom:5px;">Problem (Optional)</label>
+        <textarea name="problem" style="width: 100%; padding: 8px;" placeholder="Describe symptoms or reasons..."></textarea>
+    </div>
+    <button type="submit" style="padding: 10px; background: #2563eb; color: white; border: none; cursor: pointer; border-radius: 4px;">Submit Request</button>
+</form>

@@ -25,7 +25,7 @@ $consultations = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <tr style="background-color: #f3f4f6;">
             <th>Date & Time</th>
             <th>Doctor</th>
-            <th>Diagnosis</th>
+            <th>Report</th>
             <th>Status</th>
         </tr>
     </thead>
@@ -37,7 +37,7 @@ $consultations = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <tr>
                     <td><?= htmlspecialchars($row['consult_datetime']) ?></td>
                     <td><?= htmlspecialchars($row['doctor_name']) ?></td>
-                    <td><?= htmlspecialchars($row['diagnosis']) ?></td>
+                    <td><?= htmlspecialchars($row['report'] ?? 'N/A') ?></td>
                     <td><?= htmlspecialchars($row['status']) ?></td>
                 </tr>
             <?php endforeach; ?>

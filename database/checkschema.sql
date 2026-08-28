@@ -33,16 +33,15 @@ CREATE TABLE `admission` (
   `doctor_id` int(11) NOT NULL,
   `admission_date` datetime DEFAULT NULL,
   `admission_type` enum('Admit','Planned') NOT NULL,
-  `provisional_diagnosis` varchar(255) DEFAULT NULL,
-  `status` enum('Admitted','Discharged','Consult') DEFAULT NULL,
-  `discharge_date` datetime DEFAULT NULL
+  `problem` varchar(255) DEFAULT NULL,
+  `status` enum('Admitted','Discharged','Consult') DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `admission`
 --
 
-INSERT INTO `admission` (`admission_id`, `patient_id`, `doctor_id`, `admission_date`, `admission_type`, `provisional_diagnosis`, `status`, `discharge_date`) VALUES
+INSERT INTO `admission` (`admission_id`, `patient_id`, `doctor_id`, `admission_date`, `admission_type`, `problem`, `status`, `discharge_date`) VALUES
 (501, 301, 201, '2026-08-01 09:30:00', 'Planned', 'Hypertension', 'Discharged', '2026-08-03 11:00:00'),
 (502, 302, 202, '2026-08-04 14:00:00', 'Planned', 'Migraine', 'Discharged', '2026-08-05 12:30:00'),
 (503, 303, 203, '2026-08-07 10:15:00', 'Planned', 'High fever and infection', 'Discharged', '2026-08-09 15:00:00'),

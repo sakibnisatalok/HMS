@@ -105,6 +105,7 @@ $userName = $_SESSION['name'] ?? 'Patient';
             <nav id="sidebar-nav">
                 <a href="#" class="nav-link active" data-page="dashboard">Dashboard</a>
                 <a href="#" class="nav-link" data-page="admission">Admission</a>
+                <a href="#" class="nav-link" data-page="doctorlist">Doctors</a>
                 <a href="#" class="nav-link" data-page="consultation">Consultation</a>
                 <a href="#" class="nav-link" data-page="profile">Profile</a>
                 <a href="#" class="nav-link" data-page="edit">Edit Profile</a>
@@ -173,6 +174,38 @@ $userName = $_SESSION['name'] ?? 'Patient';
                             if (messageBox) {
                                 messageBox.style.color = data.success ? 'green' : 'red';
                                 messageBox.textContent = data.message;
+                            }
+                        })
+                        .catch(() => {
+                            if (messageBox) {
+                                messageBox.style.color = 'red';
+                                messageBox.textContent = 'Something went wrong. Please try again.';
+                            }
+                        });
+                }
+            });
+
+            // Handle Admission form submission (delegated)
+            contentArea.addEventListener('submit', (e) => {
+                if (e.target && e.target.id === 'admission-form') {
+                    e.preventDefault();
+
+                    const form = e.target;
+                    const messageBox = document.getElementById('admission-message');
+                    const formData = new FormData(form);
+
+                    fetch('admission.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (messageBox) {
+                                messageBox.style.color = data.success ? 'green' : 'red';
+                                messageBox.textContent = data.message;
+                            }
+                            if (data.success) {
+                                form.reset();
                             }
                         })
                         .catch(() => {
