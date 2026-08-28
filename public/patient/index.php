@@ -155,6 +155,35 @@ $userName = $_SESSION['name'] ?? 'Patient';
                 });
             });
 
+            // Handle Edit Profile form submission (delegated, since the form is loaded dynamically)
+            contentArea.addEventListener('submit', (e) => {
+                if (e.target && e.target.id === 'edit-profile-form') {
+                    e.preventDefault();
+
+                    const form = e.target;
+                    const messageBox = document.getElementById('edit-profile-message');
+                    const formData = new FormData(form);
+
+                    fetch('edit.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (messageBox) {
+                                messageBox.style.color = data.success ? 'green' : 'red';
+                                messageBox.textContent = data.message;
+                            }
+                        })
+                        .catch(() => {
+                            if (messageBox) {
+                                messageBox.style.color = 'red';
+                                messageBox.textContent = 'Something went wrong. Please try again.';
+                            }
+                        });
+                }
+            });
+
             // Default route: load dashboard on initial land
             loadSection('dashboard');
         });

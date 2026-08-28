@@ -3,6 +3,15 @@
 session_start();
 require_once '../../app/config/databaseconnection.php';
 
+/** @var \PDO $pdo */
+
+// Access Control Guard
+if (!isset($_SESSION['user_id']) || strtolower($_SESSION['role']) !== 'patient') {
+    http_response_code(403);
+    echo "Unauthorized";
+    exit;
+}
+
 // Fetch profile data joined from user and patient tables[cite: 2]
 $stmt = $pdo->prepare("
     SELECT u.full_name, u.username, u.email, p.gender, p.date_of_birth, p.blood_group, p.address, p.emergency_contact

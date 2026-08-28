@@ -95,15 +95,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['name'] = $user['full_name'];
 
                 // Redirect based on role to their respective folders
-                if ($user['role'] === 'admin') {
+                $userRole = strtolower($user['role']);
+                if ($userRole === 'admin') {
                     header("Location: admin/index.php");
                     exit;
-                } elseif ($user['role'] === 'doctor') {
+                } elseif ($userRole === 'doctor') {
                     header("Location: doctor/index.php");
                     exit;
-                } elseif ($user['role'] === 'patient') {
+                } elseif ($userRole === 'patient') {
                     header("Location: patient/index.php");
                     exit;
+                } else {
+                    $message = "Account role is not recognized. Please contact admin.";
+                    $messageType = "error";
                 }
             } else {
                 $message = "Invalid email or password.";
