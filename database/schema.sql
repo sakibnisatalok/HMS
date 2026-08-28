@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Aug 25, 2026 at 12:23 PM
+-- Generation Time: Aug 28, 2026 at 07:25 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -31,10 +31,10 @@ CREATE TABLE `admission` (
   `admission_id` int(11) NOT NULL,
   `patient_id` int(11) NOT NULL,
   `doctor_id` int(11) NOT NULL,
-  `admission_date` datetime NOT NULL,
-  `admission_type` enum('Emergency','Planned','Referral') NOT NULL,
-  `provisional_diagnosis` varchar(255) DEFAULT NULL,
-  `status` enum('Admitted','Discharged') NOT NULL DEFAULT 'Admitted',
+  `admission_date` datetime DEFAULT NULL,
+  `admission_type` enum('Admit','Planned') NOT NULL,
+  `problem` varchar(255) DEFAULT NULL,
+  `status` enum('Admitted','Discharged','Consult') DEFAULT NULL,
   `discharge_date` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -42,10 +42,10 @@ CREATE TABLE `admission` (
 -- Dumping data for table `admission`
 --
 
-INSERT INTO `admission` (`admission_id`, `patient_id`, `doctor_id`, `admission_date`, `admission_type`, `provisional_diagnosis`, `status`, `discharge_date`) VALUES
+INSERT INTO `admission` (`admission_id`, `patient_id`, `doctor_id`, `admission_date`, `admission_type`, `problem`, `status`, `discharge_date`) VALUES
 (501, 301, 201, '2026-08-01 09:30:00', 'Planned', 'Hypertension', 'Discharged', '2026-08-03 11:00:00'),
-(502, 302, 202, '2026-08-04 14:00:00', 'Referral', 'Migraine', 'Discharged', '2026-08-05 12:30:00'),
-(503, 303, 203, '2026-08-07 10:15:00', 'Emergency', 'High fever and infection', 'Discharged', '2026-08-09 15:00:00'),
+(502, 302, 202, '2026-08-04 14:00:00', 'Planned', 'Migraine', 'Discharged', '2026-08-05 12:30:00'),
+(503, 303, 203, '2026-08-07 10:15:00', 'Planned', 'High fever and infection', 'Discharged', '2026-08-09 15:00:00'),
 (504, 304, 203, '2026-08-10 16:30:00', 'Planned', 'Skin allergy', 'Discharged', '2026-08-11 13:00:00'),
 (505, 305, 201, '2026-08-15 09:00:00', 'Planned', 'High cholesterol', 'Admitted', NULL);
 
@@ -102,21 +102,22 @@ CREATE TABLE `consultation` (
   `admission_id` int(11) NOT NULL,
   `doctor_id` int(11) NOT NULL,
   `consult_datetime` datetime NOT NULL,
-  `diagnosis` varchar(255) DEFAULT NULL
+  `report` varchar(255) DEFAULT NULL,
+  `status` enum('Approved','Completed','Cancelled') NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `consultation`
 --
 
-INSERT INTO `consultation` (`consultation_id`, `admission_id`, `doctor_id`, `consult_datetime`, `diagnosis`) VALUES
-(601, 501, 201, '2026-08-01 10:00:00', 'Mild hypertension'),
-(602, 501, 201, '2026-08-02 10:30:00', 'Blood pressure improving'),
-(603, 502, 202, '2026-08-04 15:00:00', 'Migraine without aura'),
-(604, 503, 203, '2026-08-07 11:00:00', 'Viral fever'),
-(605, 503, 203, '2026-08-08 10:00:00', 'Fever reduced'),
-(606, 504, 203, '2026-08-10 17:00:00', 'Allergic dermatitis'),
-(607, 505, 201, '2026-08-15 10:00:00', 'High cholesterol');
+INSERT INTO `consultation` (`consultation_id`, `admission_id`, `doctor_id`, `consult_datetime`, `report`, `status`) VALUES
+(601, 501, 201, '2026-08-01 10:00:00', 'Mild hypertension', 'Approved'),
+(602, 501, 201, '2026-08-02 10:30:00', 'Blood pressure improving', 'Approved'),
+(603, 502, 202, '2026-08-04 15:00:00', 'Migraine without aura', 'Approved'),
+(604, 503, 203, '2026-08-07 11:00:00', 'Viral fever', 'Approved'),
+(605, 503, 203, '2026-08-08 10:00:00', 'Fever reduced', 'Approved'),
+(606, 504, 203, '2026-08-10 17:00:00', 'Allergic dermatitis', 'Approved'),
+(607, 505, 201, '2026-08-15 10:00:00', 'High cholesterol', 'Approved');
 
 -- --------------------------------------------------------
 
@@ -196,7 +197,8 @@ INSERT INTO `patient` (`patient_id`, `user_id`, `gender`, `date_of_birth`, `bloo
 (302, 302, 'Female', '1999-08-22', 'A+', 'Uttara, Dhaka', '01811000002'),
 (303, 303, 'Male', '2003-02-10', 'O+', 'Mohammadpur, Dhaka', '01811000003'),
 (304, 304, 'Female', '1998-11-05', 'AB+', 'Dhanmondi, Dhaka', '01811000004'),
-(305, 305, 'Male', '1995-06-18', 'B-', 'Badda, Dhaka', '01811000005');
+(305, 305, 'Male', '1995-06-18', 'B-', 'Badda, Dhaka', '01811000005'),
+(306, 306, 'Female', '2026-08-26', 'B+', '108, east rampura, 1219,Dhaka,1219,Bangladesh', '12345678901');
 
 --
 -- Triggers `patient`
@@ -330,7 +332,8 @@ INSERT INTO `user` (`user_id`, `username`, `password_hash`, `role`, `full_name`,
 (302, 'patient02', '$2y$10$e5f6g7h8i9j0k1l2m3n4o.P5q6r7s8t9u0v1w2x3y4z5a6b7c8d9', 'Patient', 'Nusrat Jahan', 'nusrat@gmail.com'),
 (303, 'patient03', '$2y$10$f6g7h8i9j0k1l2m3n4o5p.Q6r7s8t9u0v1w2x3y4z5a6b7c8d9e0', 'Patient', 'Sakib Hossain', 'sakib@gmail.com'),
 (304, 'patient04', '$2y$10$g7h8i9j0k1l2m3n4o5p6q.R7s8t9u0v1w2x3y4z5a6b7c8d9e0f1', 'Patient', 'Maliha Rahman', 'maliha@gmail.com'),
-(305, 'patient05', '$2y$10$h8i9j0k1l2m3n4o5p6q7r.S8t9u0v1w2x3y4z5a6b7c8d9e0f1g2', 'Patient', 'Farhan Kabir', 'farhan@gmail.com');
+(305, 'patient05', '$2y$10$h8i9j0k1l2m3n4o5p6q7r.S8t9u0v1w2x3y4z5a6b7c8d9e0f1g2', 'Patient', 'Farhan Kabir', 'farhan@gmail.com'),
+(306, 'abc123', '$2y$10$e8SZ9bVaS6DCWzIgYd0LZerYBum0J6//gnZs2L9Z0OWVEquw4gpKS', 'Patient', 'abc123', 'abc123@gmail.com');
 
 --
 -- Indexes for dumped tables
@@ -448,7 +451,7 @@ ALTER TABLE `medicine`
 -- AUTO_INCREMENT for table `patient`
 --
 ALTER TABLE `patient`
-  MODIFY `patient_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=306;
+  MODIFY `patient_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=307;
 
 --
 -- AUTO_INCREMENT for table `prescription`
@@ -472,7 +475,7 @@ ALTER TABLE `specialization`
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=306;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=307;
 
 --
 -- Constraints for dumped tables

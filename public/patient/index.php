@@ -92,7 +92,7 @@ $userName = $_SESSION['name'] ?? 'Patient';
 
     <!-- Top Header -->
     <header>
-        <div class="logo">HMS</div>
+        <div class="logo">HMS - Patient Portal</div>
         <div>
             <span style="margin-right: 15px; font-size: 14px;">Welcome, <?= htmlspecialchars($userName) ?></span>
             <a href="../login.php?action=logout" class="logout-btn">Logout</a>
@@ -137,6 +137,13 @@ $userName = $_SESSION['name'] ?? 'Patient';
                     })
                     .then(html => {
                         contentArea.innerHTML = html;
+                        // Execute embedded script tags
+                        const scripts = contentArea.querySelectorAll('script');
+                        scripts.forEach(oldScript => {
+                            const newScript = document.createElement('script');
+                            newScript.textContent = oldScript.textContent;
+                            oldScript.parentNode.replaceChild(newScript, oldScript);
+                        });
                     })
                     .catch(err => {
                         contentArea.innerHTML = `<p style="color:red;">Error loading section: ${err.message}</p>`;
