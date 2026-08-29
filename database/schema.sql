@@ -131,17 +131,18 @@ CREATE TABLE `doctor` (
   `specialization_id` int(11) DEFAULT NULL,
   `designation` varchar(60) DEFAULT NULL,
   `phone` varchar(20) DEFAULT NULL,
-  `status` enum('Active','Inactive') DEFAULT 'Active'
+  `status` enum('Active','Inactive') DEFAULT 'Active',
+  `experience` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `doctor`
 --
 
-INSERT INTO `doctor` (`doctor_id`, `user_id`, `specialization_id`, `designation`, `phone`, `status`) VALUES
-(201, 201, 1, 'Consultant Cardiologist', '01711000001', 'Active'),
-(202, 202, 2, 'Senior Neurologist', '01711000002', 'Active'),
-(203, 203, 4, 'General Physician', '01711000003', 'Active');
+INSERT INTO `doctor` (`doctor_id`, `user_id`, `specialization_id`, `designation`, `phone`, `status`, `experience`) VALUES
+(201, 201, 1, 'Consultant Cardiologist', '01711000001', 'Active', '10 Years'),
+(202, 202, 2, 'Senior Neurologist', '01711000002', 'Active', '8 Years'),
+(203, 203, 4, 'General Physician', '01711000003', 'Active', '5 Years');
 
 -- --------------------------------------------------------
 

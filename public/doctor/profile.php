@@ -13,7 +13,7 @@ if (!isset($_SESSION['user_id']) || strtolower($_SESSION['role']) !== 'doctor') 
 
 // Fetch doctor profile details joined with specialization
 $stmt = $pdo->prepare("
-    SELECT u.full_name, u.username, u.email, d.designation, d.phone, d.status, s.name AS specialization_name
+    SELECT u.full_name, u.username, u.email, d.designation, d.phone, d.status, d.experience, s.name AS specialization_name
     FROM user u
     LEFT JOIN doctor d ON u.user_id = d.user_id
     LEFT JOIN specialization s ON d.specialization_id = s.specialization_id
@@ -31,6 +31,7 @@ $profile = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
     <p><strong>Email:</strong> <?= htmlspecialchars($profile['email'] ?? 'N/A') ?></p>
     <p><strong>Designation:</strong> <?= htmlspecialchars($profile['designation'] ?? 'N/A') ?></p>
     <p><strong>Specialization:</strong> <?= htmlspecialchars($profile['specialization_name'] ?? 'None') ?></p>
+    <p><strong>Experience:</strong> <?= htmlspecialchars($profile['experience'] ?? 'N/A') ?></p>
     <p><strong>Phone Number:</strong> <?= htmlspecialchars($profile['phone'] ?? 'N/A') ?></p>
     <p><strong>Status:</strong> <span style="color: <?= ($profile['status'] ?? 'Active') === 'Active' ? 'green' : 'red' ?>; font-weight: bold;"><?= htmlspecialchars($profile['status'] ?? 'N/A') ?></span></p>
 </div>

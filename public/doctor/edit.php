@@ -19,6 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $phone = trim($_POST['phone'] ?? '') !== '' ? trim($_POST['phone']) : null;
     $designation = trim($_POST['designation'] ?? '') !== '' ? trim($_POST['designation']) : null;
+    $experience = trim($_POST['experience'] ?? '') !== '' ? trim($_POST['experience']) : null;
     $specializationId = filter_input(INPUT_POST, 'specialization_id', FILTER_VALIDATE_INT);
     if ($specializationId === false) {
         $specializationId = null;
@@ -27,10 +28,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $stmt = $pdo->prepare("
             UPDATE doctor
-            SET phone = ?, designation = ?, specialization_id = ?
+            SET phone = ?, designation = ?, specialization_id = ?, experience = ?
             WHERE user_id = ?
         ");
-        $stmt->execute([$phone, $designation, $specializationId, $userId]);
+        $stmt->execute([$phone, $designation, $specializationId, $experience, $userId]);
 
         echo json_encode(['success' => true, 'message' => 'Profile updated successfully!']);
     } catch (PDOException $e) {
@@ -40,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Fetch current values and specializations (GET)
-$stmt = $pdo->prepare("SELECT phone, designation, specialization_id FROM doctor WHERE user_id = ?");
+$stmt = $pdo->prepare("SELECT phone, designation, specialization_id, experience FROM doctor WHERE user_id = ?");
 $stmt->execute([$userId]);
 $doctor = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
 
@@ -59,6 +60,10 @@ $specializations = $specStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     <div>
         <label style="display:block; margin-bottom:5px;">Designation</label>
         <input type="text" name="designation" value="<?= htmlspecialchars($doctor['designation'] ?? '') ?>" placeholder="e.g. Consultant Cardiologist" style="width: 100%; padding: 8px;">
+    </div>
+    <div>
+        <label style="display:block; margin-bottom:5px;">Experience</label>
+        <input type="text" name="experience" value="<?= htmlspecialchars($doctor['experience'] ?? '') ?>" placeholder="e.g. 10 Years" style="width: 100%; padding: 8px;">
     </div>
     <div>
         <label style="display:block; margin-bottom:5px;">Specialization</label>
