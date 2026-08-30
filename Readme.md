@@ -14,40 +14,46 @@
 Hospitalmanagementsys_test/
 ├── app/
 │   ├── config/
-│   │   └── databaseconnection.php
-│   └── functions/
+│   │   └── databaseconnection.php    # PDO database connection configuration
+│   └── functions/                    # Helper functions directory
 │
 ├── database/
-│   ├── misc.md
-│   ├── schema.sql
-│   └── seed.sql
+│   ├── maintonline.sql               # [CURRENT] Active database schema and seed data
+│   ├── misc.md                       # Miscellaneous database notes and query references
+│   ├── oldschema.sql                 # Previous legacy schema backup
+│   ├── schema.sql                    # Initial database structure definition
+│   └── seed.sql                      # Base demo test dataset
 │
 ├── public/
 │   ├── admin/
-│   │   ├── dashboard.php
-│   │   ├── doctors.php
-│   │   ├── index.php
-│   │   └── patients.php
+│   │   ├── dashboard.php             # Admin overview showing live stats for doctors, patients, admissions, consultations
+│   │   ├── doctors.php               # Searchable doctor directory with specialization filter
+│   │   ├── index.php                 # Admin portal layout, header, and AJAX tab navigation
+│   │   └── patients.php              # Searchable registered patients directory
+│   │
 │   ├── doctor/
-│   │   ├── admissionreq.php
-│   │   ├── consultationreq.php
-│   │   ├── dashboard.php
-│   │   ├── edit.php
-│   │   ├── history.php
-│   │   ├── index.php
-│   │   └── profile.php
+│   │   ├── admissionreq.php          # Review, approve, or cancel in-patient hospital admission requests
+│   │   ├── consultationreq.php       # Manage pending OPD consultation appointments and record clinical diagnosis
+│   │   ├── dashboard.php             # Doctor stats dashboard for pending consultations, admissions, and history counts
+│   │   ├── edit.php                  # Update doctor phone, designation, experience, and specialization
+│   │   ├── history.php               # Unified history log of all past consultations and hospital treatments with search
+│   │   ├── index.php                 # Doctor portal layout, sidebar navigation, and AJAX form handlers
+│   │   └── profile.php               # View complete doctor profile details
+│   │
 │   ├── patient/
-│   │   ├── admission.php
-│   │   ├── dashboard.php
-│   │   ├── doctorlist.php
-│   │   ├── edit.php
-│   │   ├── history.php
-│   │   ├── index.php
-│   │   └── profile.php
-│   ├── index.php
-│   └── login.php
-├── .gitignore
-└── Readme.md
+│   │   ├── admission.php             # Submit requests for OPD consultations (Planned) or in-patient hospital admissions (Admit)
+│   │   ├── dashboard.php             # Patient dashboard showing ongoing pending requests count and history count
+│   │   ├── doctorlist.php            # Find and search active doctors by name, designation, and specialization
+│   │   ├── edit.php                  # Edit patient demographics (gender, DOB, blood group, address, emergency contact)
+│   │   ├── history.php               # View all doctor diagnoses, clinical reports, treatment notes, and status
+│   │   ├── index.php                 # Patient portal layout, sidebar navigation, and AJAX form handlers
+│   │   └── profile.php               # View patient account and medical profile details
+│   │
+│   ├── index.php                     # Landing page redirecting visitors to login/portal
+│   └── login.php                     # Unified authentication handler for Admin, Doctor, and Patient login & registration
+│
+├── .gitignore                        # Git ignore configuration
+└── Readme.md                         # Project documentation, workflow charts, and system credentials
 ```
 
 
