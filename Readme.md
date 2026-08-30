@@ -25,14 +25,15 @@ Hospitalmanagementsys_test/
 ├── public/
 │   ├── admin/
 │   │   └── dashboard.php
-│   │
-│   ├── api/
-│   │
-│   ├── asset/
-│   │
 │   ├── doctor/
+│   │   ├── admissionreq.php
+│   │   ├── consultationhistory.php
+│   │   ├── consultationreq.php
+│   │   ├── dashboard.php
+│   │   ├── edit.php
+│   │   ├── index.php
+│   │   └── profile.php
 │   │
-│   ├── patient/
 │   │   ├── admission.php
 │   │   ├── consultation.php
 │   │   ├── dashboard.php
@@ -85,3 +86,24 @@ Hospitalmanagementsys_test/
 
 ```
 
+
+# login info 
+
+
+
+```
+admin : email -adminguy@gamil.com
+        pass - adminguy
+
+doctor : email - drhasanpiker@gmail.com
+         pass -  drhasanpiker 
+
+patient : email - abc123@gmail.com
+         pass -  abc123   
+```
+
+> database name in xampp is > hms_opd_new , user > root , pass > empty
+
+
+<br>
+<br>

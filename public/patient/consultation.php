@@ -3,6 +3,8 @@
 session_start();
 require_once '../../app/config/databaseconnection.php';
 
+/** @var \PDO $pdo */
+
 // Fetch consultation records linked to patient via admission[cite: 2]
 $stmt = $pdo->prepare("
     SELECT c.*, u.full_name AS doctor_name

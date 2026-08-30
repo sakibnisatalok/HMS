@@ -31,17 +31,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // 1. REGISTRATION LOGIC
     if ($action === 'register') {
-        $username = trim($_POST['username']);
-        $email = trim($_POST['email']);
-        $password = $_POST['password'];
-        $role = $_POST['role'];
+        $username = trim($_POST['username'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+        $password = $_POST['password'] ?? '';
+        $roleInput = strtolower(trim($_POST['role'] ?? ''));
 
-        // Enforce the rule: Admin cannot be created from the UI
-        if ($role === 'admin') {
-            $message = "Error: Admin credentials cannot be created here.";
+        // Whitelist and normalize role mapping to database ENUM ('Admin', 'Doctor', 'Patient')
+        $validRoles = [
+            'admin'   => 'Admin',
+            'doctor'  => 'Doctor',
+            'patient' => 'Patient'
+        ];
+
+        if (!isset($validRoles[$roleInput])) {
+            $message = "Error: Invalid role selected.";
             $messageType = "error";
             $showRegisterForm = true;
         } else {
+            $role = $validRoles[$roleInput];
             // Hash the password for security
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
@@ -53,14 +60,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute([$username, $username, $email, $hashedPassword, $role]);
                 $newUserId = $pdo->lastInsertId();
 
-                // Insert into the matching role-specific table
-                if ($role === 'doctor') {
+                // Insert into matching role-specific table
+                if ($role === 'Doctor') {
                     $stmt2 = $pdo->prepare("INSERT INTO doctor (user_id) VALUES (?)");
                     $stmt2->execute([$newUserId]);
-                } elseif ($role === 'patient') {
+                } elseif ($role === 'Patient') {
                     $stmt2 = $pdo->prepare("INSERT INTO patient (user_id) VALUES (?)");
                     $stmt2->execute([$newUserId]);
                 }
+                // Admin does not require a secondary profile table
 
                 $pdo->commit();
                 $message = "ID created successfully! You can now log in.";
@@ -68,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } catch (PDOException $e) {
                 // Roll back both inserts if either one failed
                 $pdo->rollBack();
-                $message = "Registration failed. Email might already exist.";
+                $message = "Registration failed. Email or username might already exist.";
                 $messageType = "error";
                 $showRegisterForm = true;
             }
@@ -262,7 +270,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <option value="" disabled selected>Select your role</option>
                     <option value="doctor">Doctor</option>
                     <option value="patient">Patient</option>
-                    <!-- Admin is deliberately excluded from this HTML dropdown -->
+                    <option value="admin">Admin</option>
                 </select>
             </div>
             

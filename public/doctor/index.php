@@ -104,7 +104,9 @@ $userName = $_SESSION['name'] ?? 'Doctor';
         <aside>
             <nav id="sidebar-nav">
                 <a href="#" class="nav-link active" data-page="dashboard">Dashboard</a>
-                <a href="#" class="nav-link" data-page="consultation">Consultations</a>
+                <a href="#" class="nav-link" data-page="consultationreq">Consultation Requests</a>
+                <a href="#" class="nav-link" data-page="consultationhistory">Consultation History</a>
+                <a href="#" class="nav-link" data-page="admissionreq">Admission Requests</a>
                 <a href="#" class="nav-link" data-page="profile">Profile</a>
                 <a href="#" class="nav-link" data-page="edit">Edit Profile</a>
             </nav>
@@ -185,6 +187,42 @@ $userName = $_SESSION['name'] ?? 'Doctor';
                             if (messageBox) {
                                 messageBox.style.color = 'red';
                                 messageBox.textContent = 'Something went wrong. Please try again.';
+                            }
+                        });
+                }
+
+                // Handle Record Consultation form submission (delegated)
+                if (e.target && e.target.id === 'record-consultation-form') {
+                    e.preventDefault();
+
+                    const form = e.target;
+                    const messageBox = document.getElementById('consultation-message');
+                    const formData = new FormData(form);
+
+                    fetch('consultationreq.php', {
+                        method: 'POST',
+                        body: formData
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Reload consultation requests to refresh data and show message
+                                loadSection('consultationreq');
+                            } else {
+                                if (messageBox) {
+                                    messageBox.style.display = 'block';
+                                    messageBox.style.background = '#fee2e2';
+                                    messageBox.style.color = '#b91c1c';
+                                    messageBox.textContent = data.message;
+                                }
+                            }
+                        })
+                        .catch(() => {
+                            if (messageBox) {
+                                messageBox.style.display = 'block';
+                                messageBox.style.background = '#fee2e2';
+                                messageBox.style.color = '#b91c1c';
+                                messageBox.textContent = 'Something went wrong while saving consultation.';
                             }
                         });
                 }
