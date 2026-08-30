@@ -201,8 +201,7 @@ INSERT INTO `patient` (`patient_id`, `user_id`, `gender`, `date_of_birth`, `bloo
 (303, 303, 'Male', '2003-02-10', 'O+', 'Mohammadpur, Dhaka', '01811000003'),
 (304, 304, 'Female', '1998-11-05', 'AB+', 'Dhanmondi, Dhaka', '01811000004'),
 (305, 305, 'Male', '1995-06-18', 'B-', 'Badda, Dhaka', '01811000005'),
-(306, 306, 'Female', '2026-08-26', 'B+', '108, east rampura, 1219,Dhaka,1219,Bangladesh', '12345678901'),
-(307, 308, NULL, NULL, NULL, NULL, NULL);
+(306, 306, 'Female', '2026-08-26', 'B+', '108, east rampura, 1219,Dhaka,1219,Bangladesh', '12345678901');
 
 --
 -- Triggers `patient`

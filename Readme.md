@@ -43,7 +43,6 @@ Hospitalmanagementsys_test/
 │   │   ├── edit.php
 │   │   ├── history.php
 │   │   ├── index.php
-│   │   ├── ongoing.php
 │   │   └── profile.php
 │   ├── index.php
 │   └── login.php
@@ -148,8 +147,8 @@ Location: public/doctor/
 
 
 ```
-admin : email -adminguy@gamil.com
-        pass - adminguy
+admin : email -newadmin@gmail.com
+        pass - newadmin
 
 doctor : email - drhasanpiker@gmail.com
          pass -  drhasanpiker 
