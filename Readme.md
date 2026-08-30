@@ -24,28 +24,84 @@ Hospitalmanagementsys_test/
 │
 ├── public/
 │   ├── admin/
-│   │   └── dashboard.php
+│   │   ├── dashboard.php
+│   │   ├── doctors.php
+│   │   ├── index.php
+│   │   └── patients.php
 │   ├── doctor/
 │   │   ├── admissionreq.php
-│   │   ├── consultationhistory.php
 │   │   ├── consultationreq.php
 │   │   ├── dashboard.php
 │   │   ├── edit.php
+│   │   ├── history.php
 │   │   ├── index.php
 │   │   └── profile.php
-│   │
+│   ├── patient/
 │   │   ├── admission.php
-│   │   ├── consultation.php
 │   │   ├── dashboard.php
+│   │   ├── doctorlist.php
 │   │   ├── edit.php
+│   │   ├── history.php
+│   │   ├── index.php
+│   │   ├── ongoing.php
 │   │   └── profile.php
-│   │
 │   ├── index.php
 │   └── login.php
-│
 ├── .gitignore
 └── Readme.md
+```
 
+
+## End-to-End Clinical & Consultation Workflow
+
+```
+[ 1. PATIENT REQUEST ]
+Location: public/patient/admission.php
+Patient selects Doctor, Date & Time, Reason for Visit, and Admission Type:
+       │
+       ├───► Option A: Type = 'Planned' (OPD Consultation Appointment)
+       │     └── DB Table `admission`: status = 'Consult', admission_type = 'Planned'
+       │     └── Routed to Doctor Portal ──► "Consultation Requests"
+       │
+       └───► Option B: Type = 'Admit' (In-Patient Hospital Admission)
+             └── DB Table `admission`: status = 'Admitted', admission_type = 'Admit'
+             └── Routed to Doctor Portal ──► "Admission Requests"
+
+       │
+       ▼
+
+[ 2. DOCTOR CLINICAL ACTION & DECISION ]
+Location: public/doctor/
+
+  Scenario A: OPD Consultation (public/doctor/consultationreq.php)
+  ├── Doctor reviews patient symptoms and appointment date
+  ├── Clicks "Consult / Update"
+  ├── Selects Decision Status:
+  │     ├── 'Completed' ──► Enters Clinical Diagnosis, Findings & Prescription
+  │     └── 'Cancelled' ──► Enters Reason for Cancellation Notes
+  └── Saves to DB Table `consultation`:
+        └── status = 'Completed' | 'Cancelled'
+        └── report = [Clinical Notes / Diagnosis]
+        └── consult_datetime = [Timestamp]
+
+  Scenario B: In-Patient Admission (public/doctor/admissionreq.php)
+  ├── Doctor reviews patient vitals (Blood Group, Emergency Contact, Symptoms)
+  ├── Clicks Action:
+  │     ├── 'Approve' ──► Sets DB `admission.status` = 'Admitted', `consultation.status` = 'Approved'
+  │     └── 'Cancel'  ──► Sets DB `admission.status` = 'Discharged', `consultation.status` = 'Cancelled'
+  └── Saves admission / treatment instructions to DB Table `consultation`
+
+       │
+       ▼
+
+[ 3. REAL-TIME MULTI-PORTAL SYNCHRONIZATION ]
+
+  ├── Doctor History (public/doctor/history.php):
+  │     └── Unified table displaying all recorded consultations and hospital admissions
+  │     └── Includes live search filter and status badges ('Completed', 'Approved', 'Cancelled')
+  │
+  └── Patient Records (public/patient/history.php):
+        └── Patient immediately sees the Doctor's name, diagnosis report, date, and status in real-time
 ```
 
 

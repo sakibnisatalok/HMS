@@ -23,7 +23,7 @@ if (!$doctor) {
 
 $doctorId = (int)$doctor['doctor_id'];
 
-// 3. Fetch All Recorded Consultations for this doctor
+// 3. Fetch All Recorded History for this doctor
 $histStmt = $pdo->prepare("
     SELECT c.consultation_id, c.consult_datetime, c.report, c.status AS consult_status,
            u.full_name AS patient_name, u.email AS patient_email, a.problem, a.admission_id
@@ -38,7 +38,7 @@ $histStmt->execute([$doctorId]);
 $history = $histStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 ?>
 
-<h2>Consultation History</h2>
+<h2>History</h2>
 <hr style="margin: 15px 0;">
 
 <!-- Search Filter -->
@@ -60,7 +60,7 @@ $history = $histStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     </thead>
     <tbody>
         <?php if (empty($history)): ?>
-            <tr><td colspan="6" style="text-align: center; color: #6b7280;">No recorded consultation history found.</td></tr>
+            <tr><td colspan="6" style="text-align: center; color: #6b7280;">No recorded history found.</td></tr>
         <?php else: ?>
             <?php foreach ($history as $row): ?>
                 <tr class="consult-row">
@@ -73,7 +73,7 @@ $history = $histStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
                     <td style="max-width: 200px; font-size: 13px;"><?= htmlspecialchars($row['problem'] ?? 'N/A') ?></td>
                     <td style="max-width: 280px;"><?= htmlspecialchars($row['report'] ?? 'N/A') ?></td>
                     <td>
-                        <span style="display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold; color: <?= $row['consult_status'] === 'Completed' ? '#15803d; background: #dcfce7;' : ($row['consult_status'] === 'Cancelled' ? '#b91c1c; background: #fee2e2;' : '#0369a1; background: #e0f2fe;') ?>">
+                        <span style="display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold; color: <?= $row['consult_status'] === 'Completed' ? '#15803d; background: #dcfce7;' : ($row['consult_status'] === 'Approved' ? '#047857; background: #ecfdf5;' : ($row['consult_status'] === 'Cancelled' ? '#b91c1c; background: #fee2e2;' : '#0369a1; background: #e0f2fe;')) ?>">
                             <?= htmlspecialchars($row['consult_status']) ?>
                         </span>
                     </td>

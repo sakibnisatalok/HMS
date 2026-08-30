@@ -105,8 +105,8 @@ $userName = $_SESSION['name'] ?? 'Doctor';
             <nav id="sidebar-nav">
                 <a href="#" class="nav-link active" data-page="dashboard">Dashboard</a>
                 <a href="#" class="nav-link" data-page="consultationreq">Consultation Requests</a>
-                <a href="#" class="nav-link" data-page="consultationhistory">Consultation History</a>
                 <a href="#" class="nav-link" data-page="admissionreq">Admission Requests</a>
+                <a href="#" class="nav-link" data-page="history">History</a>
                 <a href="#" class="nav-link" data-page="profile">Profile</a>
                 <a href="#" class="nav-link" data-page="edit">Edit Profile</a>
             </nav>

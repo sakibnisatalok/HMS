@@ -23,12 +23,13 @@ if (!$doctor) {
 
 $doctorId = (int)$doctor['doctor_id'];
 
-// 3. Handle POST: Doctor Approve or Cancel Admission
+// 3. Handle POST: Doctor Approve (Approved / Admitted) or Cancel (Cancelled / Discharged)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header('Content-Type: application/json');
 
     $admissionId = filter_input(INPUT_POST, 'admission_id', FILTER_VALIDATE_INT);
     $decision = trim($_POST['decision'] ?? '');
+    $notes = trim($_POST['notes'] ?? '');
 
     if (!$admissionId) {
         echo json_encode(['success' => false, 'message' => 'Invalid Admission ID.']);
@@ -36,24 +37,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (!in_array($decision, ['approve', 'cancel'])) {
-        echo json_encode(['success' => false, 'message' => 'Invalid action.']);
+        echo json_encode(['success' => false, 'message' => 'Invalid decision.']);
         exit;
     }
 
-    // Map decision to database status enum ('Admitted' vs 'Discharged')
-    $newStatus = ($decision === 'approve') ? 'Admitted' : 'Discharged';
+    $consultStatus = ($decision === 'approve') ? 'Approved' : 'Cancelled';
+    $admissionStatus = ($decision === 'approve') ? 'Admitted' : 'Discharged';
+    $defaultNotes = ($decision === 'approve') ? 'Admission approved by doctor.' : 'Admission cancelled by doctor.';
+    $reportText = !empty($notes) ? $notes : $defaultNotes;
 
     try {
-        $stmt = $pdo->prepare("
+        $pdo->beginTransaction();
+
+        // 1. Update status in admission table
+        $admUpdate = $pdo->prepare("
             UPDATE admission
             SET status = ?
             WHERE admission_id = ? AND doctor_id = ?
         ");
-        $stmt->execute([$newStatus, $admissionId, $doctorId]);
+        $admUpdate->execute([$admissionStatus, $admissionId, $doctorId]);
+
+        // 2. Insert or Update status in consultation table as 'Approved' or 'Cancelled'
+        $cCheck = $pdo->prepare("SELECT consultation_id FROM consultation WHERE admission_id = ?");
+        $cCheck->execute([$admissionId]);
+        $existingConsult = $cCheck->fetch(PDO::FETCH_ASSOC);
+
+        $now = date('Y-m-d H:i:s');
+        if ($existingConsult) {
+            $cUpdate = $pdo->prepare("
+                UPDATE consultation
+                SET consult_datetime = ?, report = ?, status = ?
+                WHERE consultation_id = ?
+            ");
+            $cUpdate->execute([$now, $reportText, $consultStatus, $existingConsult['consultation_id']]);
+        } else {
+            $cInsert = $pdo->prepare("
+                INSERT INTO consultation (admission_id, doctor_id, consult_datetime, report, status)
+                VALUES (?, ?, ?, ?, ?)
+            ");
+            $cInsert->execute([$admissionId, $doctorId, $now, $reportText, $consultStatus]);
+        }
+
+        $pdo->commit();
 
         $msg = ($decision === 'approve') ? 'Admission approved successfully!' : 'Admission request cancelled.';
         echo json_encode(['success' => true, 'message' => $msg]);
     } catch (PDOException $e) {
+        $pdo->rollBack();
         echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
     }
     exit;
@@ -63,10 +93,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $admStmt = $pdo->prepare("
     SELECT a.admission_id, u.full_name AS patient_name, u.email AS patient_email,
            p.gender, p.blood_group, p.emergency_contact, p.address,
-           a.admission_date, a.problem, a.status AS admission_status
+           a.admission_date, a.problem, a.status AS admission_status,
+           c.status AS consult_status, c.report AS consult_report
     FROM admission a
     JOIN patient p ON a.patient_id = p.patient_id
     JOIN user u ON p.user_id = u.user_id
+    LEFT JOIN consultation c ON a.admission_id = c.admission_id
     WHERE a.doctor_id = ? AND a.admission_type = 'Admit'
     ORDER BY a.admission_date DESC
 ");
@@ -80,7 +112,7 @@ $admissions = $admStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 <div id="admissionreq-message" style="margin-bottom: 15px; display: none; padding: 10px; border-radius: 4px;"></div>
 
 <p style="color: #4b5563; margin-bottom: 20px;">
-    Review in-patient hospital admission requests. You can approve admissions or cancel/discharge them.
+    Review in-patient admission requests. You can approve or cancel requests directly from the action section.
 </p>
 
 <!-- Table of In-Patient Admissions -->
@@ -118,27 +150,32 @@ $admissions = $admStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
                         <span style="display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold; background: <?= $row['admission_status'] === 'Admitted' ? '#dcfce7; color: #15803d;' : ($row['admission_status'] === 'Discharged' ? '#fee2e2; color: #b91c1c;' : '#fef3c7; color: #92400e;') ?>">
                             <?= htmlspecialchars($row['admission_status']) ?>
                         </span>
+                        <?php if (!empty($row['consult_status'])): ?>
+                            <div style="font-size: 11px; margin-top: 4px; font-weight: bold; color: <?= $row['consult_status'] === 'Approved' ? '#15803d' : '#b91c1c' ?>;">
+                                Consultation: <?= htmlspecialchars($row['consult_status']) ?>
+                            </div>
+                        <?php endif; ?>
                     </td>
                     <td>
                         <div style="display: flex; gap: 6px;">
-                            <?php if ($row['admission_status'] !== 'Admitted'): ?>
-                                <button type="button" 
-                                        class="btn-admission-action" 
-                                        data-admission-id="<?= htmlspecialchars($row['admission_id']) ?>" 
-                                        data-decision="approve"
-                                        style="background: #10b981; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold;">
-                                    Approve
-                                </button>
-                            <?php endif; ?>
-                            <?php if ($row['admission_status'] !== 'Discharged'): ?>
-                                <button type="button" 
-                                        class="btn-admission-action" 
-                                        data-admission-id="<?= htmlspecialchars($row['admission_id']) ?>" 
-                                        data-decision="cancel"
-                                        style="background: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold;">
-                                    Cancel
-                                </button>
-                            <?php endif; ?>
+                            <button type="button" 
+                                    class="btn-open-admission-modal" 
+                                    data-admission-id="<?= htmlspecialchars($row['admission_id']) ?>" 
+                                    data-patient-name="<?= htmlspecialchars($row['patient_name']) ?>"
+                                    data-decision="approve"
+                                    data-notes="<?= htmlspecialchars($row['consult_report'] ?? '') ?>"
+                                    style="background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold;">
+                                Approve
+                            </button>
+                            <button type="button" 
+                                    class="btn-open-admission-modal" 
+                                    data-admission-id="<?= htmlspecialchars($row['admission_id']) ?>" 
+                                    data-patient-name="<?= htmlspecialchars($row['patient_name']) ?>"
+                                    data-decision="cancel"
+                                    data-notes="<?= htmlspecialchars($row['consult_report'] ?? '') ?>"
+                                    style="background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold;">
+                                Cancel
+                            </button>
                         </div>
                     </td>
                 </tr>
@@ -147,25 +184,87 @@ $admissions = $admStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     </tbody>
 </table>
 
+<!-- Admission Action Drawer / Popup Window -->
+<div id="admission-form-container" style="display: none; border-radius: 8px; padding: 20px; margin-top: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+    <h3 id="admission-form-title" style="margin-bottom: 12px;"></h3>
+    <form id="record-admission-form" style="display: flex; flex-direction: column; gap: 14px;">
+        <input type="hidden" name="admission_id" id="admission-modal-id">
+        <input type="hidden" name="decision" id="admission-modal-decision">
+
+        <div>
+            <label id="admission-notes-label" style="display: block; font-weight: bold; margin-bottom: 4px; font-size: 14px;">Doctor Notes / Instructions</label>
+            <textarea name="notes" id="admission-modal-notes" rows="4" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;"></textarea>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <button type="submit" id="btn-save-admission-decision" style="color: white; border: none; padding: 8px 18px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px;">Confirm</button>
+            <button type="button" id="btn-close-admission-modal" style="background: #e5e7eb; color: #374151; border: none; padding: 8px 18px; border-radius: 4px; cursor: pointer; font-size: 14px;">Close</button>
+        </div>
+    </form>
+</div>
+
 <script>
 (function() {
-    const actionButtons = document.querySelectorAll('.btn-admission-action');
+    const container = document.getElementById('admission-form-container');
+    const title = document.getElementById('admission-form-title');
+    const notesLabel = document.getElementById('admission-notes-label');
+    const notesTextarea = document.getElementById('admission-modal-notes');
+    const saveBtn = document.getElementById('btn-save-admission-decision');
+    const idInput = document.getElementById('admission-modal-id');
+    const decisionInput = document.getElementById('admission-modal-decision');
+    const closeBtn = document.getElementById('btn-close-admission-modal');
+    const buttons = document.querySelectorAll('.btn-open-admission-modal');
     const messageBox = document.getElementById('admissionreq-message');
+    const form = document.getElementById('record-admission-form');
 
-    actionButtons.forEach(btn => {
+    buttons.forEach(btn => {
         btn.addEventListener('click', function() {
             const admId = this.getAttribute('data-admission-id');
+            const pName = this.getAttribute('data-patient-name');
             const decision = this.getAttribute('data-decision');
+            const notes = this.getAttribute('data-notes');
 
-            const confirmMsg = decision === 'approve' 
-                ? 'Are you sure you want to approve this admission?' 
-                : 'Are you sure you want to cancel this admission?';
+            if (container && idInput && decisionInput) {
+                idInput.value = admId;
+                decisionInput.value = decision;
+                notesTextarea.value = notes || '';
 
-            if (!confirm(confirmMsg)) return;
+                if (decision === 'approve') {
+                    title.textContent = 'Approve Admission for ' + pName + ' (#' + admId + ')';
+                    title.style.color = '#065f46';
+                    container.style.border = '2px solid #10b981';
+                    container.style.background = '#ecfdf5';
+                    notesLabel.textContent = 'Admission / Treatment Notes (Saved to Consultation as Approved)';
+                    notesTextarea.placeholder = 'Enter admission instructions, bed ward notes, or diagnosis...';
+                    saveBtn.textContent = 'Approve Admission';
+                    saveBtn.style.background = '#10b981';
+                } else {
+                    title.textContent = 'Cancel Admission for ' + pName + ' (#' + admId + ')';
+                    title.style.color = '#991b1b';
+                    container.style.border = '2px solid #ef4444';
+                    container.style.background = '#fef2f2';
+                    notesLabel.textContent = 'Cancellation Reason (Saved to Consultation as Cancelled)';
+                    notesTextarea.placeholder = 'Enter reason for cancellation (e.g. bed unavailable, patient cancelled)...';
+                    saveBtn.textContent = 'Cancel Admission';
+                    saveBtn.style.background = '#ef4444';
+                }
 
-            const formData = new FormData();
-            formData.append('admission_id', admId);
-            formData.append('decision', decision);
+                container.style.display = 'block';
+                container.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    });
+
+    if (closeBtn && container) {
+        closeBtn.addEventListener('click', function() {
+            container.style.display = 'none';
+        });
+    }
+
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(form);
 
             fetch('admissionreq.php', {
                 method: 'POST',
@@ -203,10 +302,10 @@ $admissions = $admStmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
                     messageBox.style.display = 'block';
                     messageBox.style.background = '#fee2e2';
                     messageBox.style.color = '#b91c1c';
-                    messageBox.textContent = 'Failed to process request.';
+                    messageBox.textContent = 'Failed to process admission decision.';
                 }
             });
         });
-    });
+    }
 })();
 </script>

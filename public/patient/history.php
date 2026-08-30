@@ -1,11 +1,17 @@
-
 <?php
 session_start();
 require_once '../../app/config/databaseconnection.php';
 
 /** @var \PDO $pdo */
 
-// Fetch consultation records linked to patient via admission[cite: 2]
+// 1. Access Control Guard
+if (!isset($_SESSION['user_id']) || strtolower($_SESSION['role']) !== 'patient') {
+    http_response_code(403);
+    echo "Unauthorized";
+    exit;
+}
+
+// 2. Fetch consultation records linked to patient via admission
 $stmt = $pdo->prepare("
     SELECT c.*, u.full_name AS doctor_name
     FROM consultation c
@@ -20,7 +26,7 @@ $stmt->execute([$_SESSION['user_id']]);
 $consultations = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
-<h2>Consultation Records</h2>
+<h2>History</h2>
 <hr style="margin: 15px 0;">
 <table border="1" cellpadding="10" cellspacing="0" style="width: 100%; border-collapse: collapse; text-align: left;">
     <thead>
@@ -33,7 +39,7 @@ $consultations = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </thead>
     <tbody>
         <?php if (empty($consultations)): ?>
-            <tr><td colspan="4" style="text-align:center;">No consultation records found.</td></tr>
+            <tr><td colspan="4" style="text-align:center;">No history records found.</td></tr>
         <?php else: ?>
             <?php foreach ($consultations as $row): ?>
                 <tr>
