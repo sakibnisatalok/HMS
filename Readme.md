@@ -1,4 +1,6 @@
 
+> **Database Note**: This project is using `database/final-schema.sql` as its active live database schema.
+
 # Hospital Management System
 
 
@@ -18,9 +20,12 @@ Hospitalmanagementsys_test/
 │   └── functions/                    # Helper functions directory
 │
 ├── database/
-│   ├── maintonline.sql               # [CURRENT] Active database schema and seed data
+│   ├── final-schema.sql              # [ACTIVE] Live database schema, triggers, and sample data
+│   ├── maintonline.sql               # Database schema backup
 │   ├── misc.md                       # Miscellaneous database notes and query references
 │   ├── oldschema.sql                 # Previous legacy schema backup
+│   ├── procedure.md                  # Documentation and SQL definition for stored procedure
+│   ├── querylist.md                  # Comprehensive catalog of all SQL queries, triggers, and procedures
 │   ├── schema.sql                    # Initial database structure definition
 │   ├── seed.sql                      # Base demo test dataset
 │   └── trigger.md                    # Documentation and SQL definitions for database triggers
@@ -166,7 +171,7 @@ patient : email - abc123@gmail.com
          pass -  abc123   
 ```
 
-> database name in xampp is > hms_opd_new , user > root , pass > empty
+> database name in my xampp is > hms_opd_new , user > root , pass > empty
 
 
 <br>
