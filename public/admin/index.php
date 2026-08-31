@@ -106,6 +106,8 @@ $userName = $_SESSION['name'] ?? 'Administrator';
                 <a href="#" class="nav-link active" data-page="dashboard">Dashboard</a>
                 <a href="#" class="nav-link" data-page="doctors">Doctors</a>
                 <a href="#" class="nav-link" data-page="patients">Patients</a>
+                <a href="#" class="nav-link" data-page="addclient">Add Client</a>
+                <a href="#" class="nav-link" data-page="deleteclient">Delete Client</a>
             </nav>
         </aside>
 

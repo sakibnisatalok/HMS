@@ -146,36 +146,7 @@ INSERT INTO `doctor` (`doctor_id`, `user_id`, `specialization_id`, `designation`
 (203, 203, 4, 'General Physician', '01711000003', 'Active', NULL),
 (204, 307, 3, 'Consultant Dermatology', '1112223333', 'Active', '40 yrs');
 
--- --------------------------------------------------------
 
---
--- Table structure for table `medicine`
---
-
-CREATE TABLE `medicine` (
-  `medicine_id` int(11) NOT NULL,
-  `name` varchar(100) NOT NULL,
-  `form` varchar(40) DEFAULT NULL,
-  `strength` varchar(40) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `medicine`
---
-
-INSERT INTO `medicine` (`medicine_id`, `name`, `form`, `strength`) VALUES
-(401, 'Paracetamol', 'Tablet', '500 mg'),
-(402, 'Omeprazole', 'Capsule', '20 mg'),
-(403, 'Amlodipine', 'Tablet', '5 mg'),
-(404, 'Atorvastatin', 'Tablet', '20 mg'),
-(405, 'Cetirizine', 'Tablet', '10 mg'),
-(406, 'Azithromycin', 'Tablet', '500 mg'),
-(407, 'Metformin', 'Tablet', '500 mg'),
-(408, 'Clobetasol', 'Cream', '0.05%'),
-(409, 'Pregabalin', 'Capsule', '75 mg'),
-(410, 'Vitamin D3', 'Tablet', '1000 IU');
-
--- --------------------------------------------------------
 
 --
 -- Table structure for table `patient`
@@ -225,66 +196,7 @@ END
 $$
 DELIMITER ;
 
--- --------------------------------------------------------
 
---
--- Table structure for table `prescription`
---
-
-CREATE TABLE `prescription` (
-  `prescription_id` int(11) NOT NULL,
-  `consultation_id` int(11) NOT NULL,
-  `prescribed_at` datetime NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `prescription`
---
-
-INSERT INTO `prescription` (`prescription_id`, `consultation_id`, `prescribed_at`) VALUES
-(701, 601, '2026-08-01 10:15:00'),
-(702, 602, '2026-08-02 10:45:00'),
-(703, 603, '2026-08-04 15:15:00'),
-(704, 604, '2026-08-07 11:15:00'),
-(705, 605, '2026-08-08 10:15:00'),
-(706, 606, '2026-08-10 17:15:00'),
-(707, 607, '2026-08-15 10:15:00');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `prescription_item`
---
-
-CREATE TABLE `prescription_item` (
-  `item_id` int(11) NOT NULL,
-  `prescription_id` int(11) NOT NULL,
-  `medicine_id` int(11) NOT NULL,
-  `dosage` varchar(40) DEFAULT NULL,
-  `frequency` varchar(40) DEFAULT NULL,
-  `duration` varchar(40) DEFAULT NULL,
-  `instruction` varchar(120) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `prescription_item`
---
-
-INSERT INTO `prescription_item` (`item_id`, `prescription_id`, `medicine_id`, `dosage`, `frequency`, `duration`, `instruction`) VALUES
-(801, 701, 403, '1 tablet', 'Once daily', '30 days', 'Take after breakfast'),
-(802, 702, 403, '1 tablet', 'Once daily', '30 days', 'Take after breakfast'),
-(803, 702, 404, '1 tablet', 'Once daily', '30 days', 'Take at night'),
-(804, 703, 401, '1 tablet', 'When needed', '5 days', 'Take after food'),
-(805, 703, 409, '1 capsule', 'Once daily', '7 days', 'Take at night'),
-(806, 704, 401, '1 tablet', 'Three times daily', '5 days', 'Take after meals'),
-(807, 704, 406, '1 tablet', 'Once daily', '3 days', 'Complete the course'),
-(808, 705, 401, '1 tablet', 'Twice daily', '3 days', 'Take after meals'),
-(809, 706, 408, 'Apply thin layer', 'Twice daily', '7 days', 'Apply to affected area'),
-(810, 707, 404, '1 tablet', 'Once daily', '30 days', 'Take at night'),
-(811, 707, 410, '1 tablet', 'Once daily', '30 days', 'Take after breakfast'),
-(812, 707, 402, '1 capsule', 'Once daily', '14 days', 'Take before breakfast');
-
--- --------------------------------------------------------
 
 --
 -- Table structure for table `specialization`
@@ -375,33 +287,7 @@ ALTER TABLE `doctor`
   ADD UNIQUE KEY `user_id` (`user_id`),
   ADD KEY `specialization_id` (`specialization_id`);
 
---
--- Indexes for table `medicine`
---
-ALTER TABLE `medicine`
-  ADD PRIMARY KEY (`medicine_id`);
 
---
--- Indexes for table `patient`
---
-ALTER TABLE `patient`
-  ADD PRIMARY KEY (`patient_id`),
-  ADD UNIQUE KEY `user_id` (`user_id`);
-
---
--- Indexes for table `prescription`
---
-ALTER TABLE `prescription`
-  ADD PRIMARY KEY (`prescription_id`),
-  ADD KEY `consultation_id` (`consultation_id`);
-
---
--- Indexes for table `prescription_item`
---
-ALTER TABLE `prescription_item`
-  ADD PRIMARY KEY (`item_id`),
-  ADD KEY `prescription_id` (`prescription_id`),
-  ADD KEY `medicine_id` (`medicine_id`);
 
 --
 -- Indexes for table `specialization`
@@ -447,28 +333,10 @@ ALTER TABLE `doctor`
   MODIFY `doctor_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=205;
 
 --
--- AUTO_INCREMENT for table `medicine`
---
-ALTER TABLE `medicine`
-  MODIFY `medicine_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=411;
-
---
 -- AUTO_INCREMENT for table `patient`
 --
 ALTER TABLE `patient`
   MODIFY `patient_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=308;
-
---
--- AUTO_INCREMENT for table `prescription`
---
-ALTER TABLE `prescription`
-  MODIFY `prescription_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=708;
-
---
--- AUTO_INCREMENT for table `prescription_item`
---
-ALTER TABLE `prescription_item`
-  MODIFY `item_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=813;
 
 --
 -- AUTO_INCREMENT for table `specialization`
@@ -490,8 +358,8 @@ ALTER TABLE `user`
 -- Constraints for table `admission`
 --
 ALTER TABLE `admission`
-  ADD CONSTRAINT `admission_doctor_fk` FOREIGN KEY (`doctor_id`) REFERENCES `doctor` (`doctor_id`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `admission_patient_fk` FOREIGN KEY (`patient_id`) REFERENCES `patient` (`patient_id`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `admission_doctor_fk` FOREIGN KEY (`doctor_id`) REFERENCES `doctor` (`doctor_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `admission_patient_fk` FOREIGN KEY (`patient_id`) REFERENCES `patient` (`patient_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `bill`
@@ -504,7 +372,7 @@ ALTER TABLE `bill`
 --
 ALTER TABLE `consultation`
   ADD CONSTRAINT `consultation_admission_fk` FOREIGN KEY (`admission_id`) REFERENCES `admission` (`admission_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `consultation_doctor_fk` FOREIGN KEY (`doctor_id`) REFERENCES `doctor` (`doctor_id`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `consultation_doctor_fk` FOREIGN KEY (`doctor_id`) REFERENCES `doctor` (`doctor_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `doctor`
@@ -519,18 +387,6 @@ ALTER TABLE `doctor`
 ALTER TABLE `patient`
   ADD CONSTRAINT `patient_user_fk` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
---
--- Constraints for table `prescription`
---
-ALTER TABLE `prescription`
-  ADD CONSTRAINT `prescription_consultation_fk` FOREIGN KEY (`consultation_id`) REFERENCES `consultation` (`consultation_id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Constraints for table `prescription_item`
---
-ALTER TABLE `prescription_item`
-  ADD CONSTRAINT `item_medicine_fk` FOREIGN KEY (`medicine_id`) REFERENCES `medicine` (`medicine_id`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `item_prescription_fk` FOREIGN KEY (`prescription_id`) REFERENCES `prescription` (`prescription_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -3,5 +3,4 @@
 - uddate status type in admission table as well. done
 - add consultation status in consultation table. done 
 - revamp admission table.** done
-- delete prescription,prescription_item and medicine from the database.
-
+- delete prescription,prescription_item and medicine from the database. done

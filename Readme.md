@@ -26,7 +26,9 @@ Hospitalmanagementsys_test/
 │
 ├── public/
 │   ├── admin/
+│   │   ├── addclient.php             # Admin registration form for creating new Doctor or Patient accounts
 │   │   ├── dashboard.php             # Admin overview showing live stats for doctors, patients, admissions, consultations
+│   │   ├── deleteclient.php          # Searchable client deletion interface with cascade cleanup
 │   │   ├── doctors.php               # Searchable doctor directory with specialization filter
 │   │   ├── index.php                 # Admin portal layout, header, and AJAX tab navigation
 │   │   └── patients.php              # Searchable registered patients directory

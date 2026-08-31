@@ -50,7 +50,10 @@ $totalConsultations = $pdo->query("SELECT COUNT(*) FROM consultation")->fetchCol
 
 <div style="margin-top: 30px; background: #fafafa; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px;">
     <h3 style="color: #111827; margin-bottom: 10px;">Quick Management</h3>
-    <p style="color: #4b5563; font-size: 14px; line-height: 1.6;">
-        From this portal, you can monitor hospital operations, view complete directory records for registered doctors, and review patient account details directly from the sidebar navigation.
+    <p style="color: #4b5563; font-size: 14px; line-height: 1.6; margin-bottom: 15px;">
+        From this portal, you can monitor hospital operations, view complete directory records for registered doctors, review patient account details, or register new clients.
     </p>
+    <button type="button" onclick="document.querySelector('.nav-link[data-page=\'addclient\']')?.click();" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background-color: #4f46e5; color: #ffffff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; transition: background-color 0.2s;">
+        + Add New Client (Doctor / Patient)
+    </button>
 </div>
