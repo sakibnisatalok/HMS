@@ -22,7 +22,8 @@ Hospitalmanagementsys_test/
 │   ├── misc.md                       # Miscellaneous database notes and query references
 │   ├── oldschema.sql                 # Previous legacy schema backup
 │   ├── schema.sql                    # Initial database structure definition
-│   └── seed.sql                      # Base demo test dataset
+│   ├── seed.sql                      # Base demo test dataset
+│   └── trigger.md                    # Documentation and SQL definitions for database triggers
 │
 ├── public/
 │   ├── admin/

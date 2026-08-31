@@ -187,10 +187,25 @@ END
 $$
 DELIMITER ;
 DELIMITER $$
-CREATE TRIGGER `chk_patient_dob_update` BEFORE UPDATE ON `patient` FOR EACH ROW BEGIN
-    IF NEW.date_of_birth > CURRENT_DATE() THEN
+CREATE TRIGGER `chk_patient_update_validation` BEFORE UPDATE ON `patient` FOR EACH ROW BEGIN
+    -- 1. Date of Birth Validation
+    IF NEW.date_of_birth IS NOT NULL AND NEW.date_of_birth > CURRENT_DATE() THEN
         SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Date of birth cannot be in the future.';
+        SET MESSAGE_TEXT = 'Trigger Error: Date of birth cannot be in the future.';
+    END IF;
+
+    -- 2. Blood Group Validation
+    IF NEW.blood_group IS NOT NULL AND NEW.blood_group != '' 
+       AND NEW.blood_group NOT IN ('A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-') THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Trigger Error: Invalid blood group. Must be A+, A-, B+, B-, AB+, AB-, O+, or O-.';
+    END IF;
+
+    -- 3. Emergency Contact Validation
+    IF NEW.emergency_contact IS NOT NULL AND NEW.emergency_contact != '' 
+       AND CHAR_LENGTH(NEW.emergency_contact) < 11 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Trigger Error: Emergency contact must be at least 11 digits.';
     END IF;
 END
 $$

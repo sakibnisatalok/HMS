@@ -33,7 +33,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         echo json_encode(['success' => true, 'message' => 'Profile updated successfully!']);
     } catch (PDOException $e) {
-        echo json_encode(['success' => false, 'message' => 'Update failed. Please try again.']);
+        $triggerMsg = $e->errorInfo[2] ?? 'Update failed. Please check your inputs.';
+        echo json_encode(['success' => false, 'message' => $triggerMsg]);
     }
     exit;
 }

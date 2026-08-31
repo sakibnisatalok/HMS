@@ -4,3 +4,10 @@
 - add consultation status in consultation table. done 
 - revamp admission table.** done
 - delete prescription,prescription_item and medicine from the database. done
+
+
+--What is a Stored Procedure?
+A stored procedure is a saved collection
+of SQL statements and procedural logic
+(like loops, conditions, and variables) that lives
+ directly inside the database.
